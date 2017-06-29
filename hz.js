@@ -3,9 +3,9 @@ var cheerio = require('cheerio');
 var async = require('async');
 var fs = require('fs');
 var request = require('request');
-var page=1;
-var num = 0;
-var storeid = 1;
+var page=1; //获取发型师处有分页功能，所以用该变量控制分页
+var num = 0;//爬取到的信息总条数
+var storeid = 1;//门店ID
 console.log('爬虫程序开始运行......');
 
 function fetchPage(x) {     //封装函数
@@ -29,11 +29,11 @@ function startRequest(x) {
 	    	if(err){
 	            console.log(err);
 	        }else{
-		        var heroes = JSON.parse(res.text);
-		        var deslist =  heroes.data.designerlist;
+		        var designJson = JSON.parse(res.text);
+		        var deslist =  designJson.data.designerlist;
 		        if(deslist.length > 0){
 					num += deslist.length;
-			        // 并发遍历heroes对象
+			        // 并发遍历deslist对象
 					async.mapLimit(deslist, 5, 
 						function (hair, callback) {
 						// 对每个对象的处理逻辑
@@ -71,7 +71,7 @@ function saveImg(hair,callback){
         if(err){
             console.log(err);
         }else{
-   			 request(img_src).pipe(fs.createWriteStream('./image/' + img_filename));     //通过流的方式，把图片写到本地/image目录下，并用新闻的标题和图片的标题作为图片的名称。
+   			 request(img_src).pipe(fs.createWriteStream('./image/' + img_filename));     //通过流的方式，把图片写到本地/image目录下，并用发型师的姓名和所属门店作为图片的名称。
    			 console.log('...存储id='+hair.id+'相关图片成功！');
         }
     });
